@@ -1,21 +1,22 @@
-import React from 'react'
 import { Link } from "react-router-dom";
+import { useGetPostsQuery } from "../api";
 
 
 const PostsList = () => {
-    const post = {
-        id: 0,
-        title: 'title',
-        body: 'body',
-    }
+    const { data: posts } = useGetPostsQuery(1);
+
     return (
         <ul>
-            <li>
-                <div className="post-id">{post.id}</div>
-                <div className="post-title">{post.title}</div>
-                <div className="post-body">{post.body}</div>
-                <Link to={`/posts/${post.id}`}>Просмотр</Link>
-            </li>
+            {
+                posts ? posts.map((post) => (
+                    <li key={post.id}>
+                        <div className="post-id">{post.id}</div>
+                        <div className="post-title">{post.title}</div>
+                        <div className="post-body">{post.body}</div>
+                        <Link to={`/posts/${post.id}`}>Просмотр</Link>
+                    </li>
+                )) : null
+            }
         </ul>
     )
 }
