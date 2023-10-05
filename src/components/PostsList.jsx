@@ -12,17 +12,19 @@ const PostsList = () => {
     const Row = ({ index, style }) => {
         const item = items[index];
         return (
-            <div style={style}>
+            <ul style={style}>
                 {item ? (
-                    <div>
-                        <div className="post-id">{item.id}</div>
-                        <div className="post-title">{item.title}</div>
-                        <div className="post-body">{item.body}</div>
+                    <li className="post">
+                        <span className="post-id">{item.id}.</span>
+                        <p className="post-title">{item.title}</p>
+                        <div className="post-body">
+                            {item.body.split('').length > 50 ? item.body.substring(0, 47) + "..." : item.body}
+                        </div>
                         <Link to={`/posts/${item.id}`}>Просмотр</Link>
-                    </div>
+                    </li>
                 ) : ('loading...')}
 
-            </div>
+            </ul>
         )
     }
 
@@ -66,7 +68,7 @@ const PostsList = () => {
                     height={window.innerHeight}
                     itemCount={100}
                     itemSize={105}
-                    width={1000}
+                    width={window.innerWidth}
                     ref={ref}
                     onItemsRendered={onItemsRendered}
                 >

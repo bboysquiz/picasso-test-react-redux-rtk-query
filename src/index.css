@@ -9,3 +9,7 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+.post {
+  display: flex;
+  align-items: center;
+}
