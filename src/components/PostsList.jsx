@@ -1,23 +1,79 @@
 import { Link } from "react-router-dom";
-import { useGetPostsQuery } from "../api";
+import { FixedSizeList as List } from 'react-window';
+import InfiniteLoader from 'react-window-infinite-loader';
 
 
 const PostsList = () => {
-    const { data: posts } = useGetPostsQuery(1);
+    let items = {}
+    let requestCache = {}
+
+    const getUrl = (rows, start) => `https://jsonplaceholder.typicode.com/posts?_start=${start}&_limit=${rows}`
+
+    const Row = ({ index, style }) => {
+        const item = items[index];
+        return (
+            <div style={style}>
+                {item ? (
+                    <div>
+                        <div className="post-id">{item.id}</div>
+                        <div className="post-title">{item.title}</div>
+                        <div className="post-body">{item.body}</div>
+                        <Link to={`/posts/${item.id}`}>Просмотр</Link>
+                    </div>
+                ) : ('loading...')}
+
+            </div>
+        )
+    }
+
+    const isItemLoaded = ({ index }) => !!items[index];
+
+    const loadMoreItems = (visibleStartIndex, visibleStopIndex) => {
+        const key = [visibleStartIndex, visibleStopIndex].join('.');
+        if (requestCache[key]) {
+            return;
+        }
+        const length = visibleStopIndex - visibleStartIndex
+        const visibleRange = [...Array(length).keys()].map(
+            x => x + visibleStartIndex
+        )
+        const itemsRetrieved = visibleRange.every(index => !!items[index])
+
+        if (itemsRetrieved) {
+            requestCache[key] = key;
+            return;
+        }
+
+        return fetch(getUrl(length, visibleStartIndex))
+            .then(response => response.json())
+            .then(data => {
+                console.log(data)
+                data.forEach((item, index) => {
+                    items[index + visibleStartIndex] = item
+                })
+            })
+            .catch(error => console.error('error:', error));
+    }
 
     return (
-        <ul>
-            {
-                posts ? posts.map((post) => (
-                    <li key={post.id}>
-                        <div className="post-id">{post.id}</div>
-                        <div className="post-title">{post.title}</div>
-                        <div className="post-body">{post.body}</div>
-                        <Link to={`/posts/${post.id}`}>Просмотр</Link>
-                    </li>
-                )) : null
-            }
-        </ul>
+        <InfiniteLoader
+            isItemLoaded={isItemLoaded}
+            loadMoreItems={loadMoreItems}
+            itemCount={100}
+        >
+            {({ onItemsRendered, ref }) => (
+                <List
+                    height={window.innerHeight}
+                    itemCount={100}
+                    itemSize={105}
+                    width={1000}
+                    ref={ref}
+                    onItemsRendered={onItemsRendered}
+                >
+                    {Row}
+                </List>
+            )}
+        </InfiniteLoader>
     )
 }
 
